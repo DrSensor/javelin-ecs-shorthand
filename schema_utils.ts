@@ -69,6 +69,17 @@ export type Schema<T = unknown> = {
     [key: string]: SchemaKey<T>
 }
 
+/** Helper type to narrow Schema into the original Schema (Schema of DataType).
+ * It mostly used to infer the return type of generic Schema.
+ * @example
+ * declare function createSchema<S extends Schema>(schema: S): NarrowSchema<S>;
+ * 
+ * expectType<{
+ *  value: DataType<[number, string]>
+ * }>(createSchema({
+ *  value: [Number, String] as const
+ * }))
+ */
 export type NarrowSchema<S extends Schema> = { [K in keyof S]:
     S[K] extends SchemaType<unknown> ? NarrowSchemaType<S[K]>
     : S[K] extends WithDefault ? NarrowSchemaType<S[K]['type']> //@ts-ignore
@@ -100,7 +111,7 @@ export const createSchema = <S extends Schema>(schema: S): NarrowSchema<S> => //
 
 let c
     // : { b: DataType<[number, string, ...string[]]> }
-    // : { b: DataType<number> }
+    // : { b: DataType<[number, string]> }
     // : { b: { type: DataType<Number>, defaultValue: number } }
     : { b: { c: DataType<number[]> } }
     // : { b: DataType<NumberConstructor> }
@@ -113,7 +124,7 @@ let c
             c: Array.of(number)
             // c: number
         },
-        // b: [Number] as const,
+        // b: [Number, String] as const,
         // b: number,
         // c: [Number] as const,
         // c: [Number, Number] as const,
