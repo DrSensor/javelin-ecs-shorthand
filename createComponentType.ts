@@ -3,8 +3,8 @@ import { createSchema, Schema, NarrowSchema } from './schema_utils'
 import { tuple, number, string } from './standard_data_types'
 
 //@ts-ignore
-type ComponentType = _ComponentType<Schema>
-type NarrowComponentTypeSchema<T extends ComponentType> = {
+type ComponentType<S extends Schema = Schema> = _ComponentType<S>
+type NarrowComponentTypeSchema<T extends ComponentType<S>, S extends Schema = Schema> = {
     [K in keyof T]: K extends 'schema' ? NarrowSchema<T[K]> : T[K]
 }
 
@@ -24,13 +24,10 @@ const schema = {
             type: 1,
             schema,
         })
-    //@ts-expect-error
     , _1: _Test =
         createComponentType(schema)
-    //@ts-expect-error
     , _2: _Test =
         createComponentType("name", schema)
-    //@ts-expect-error
     , _3: _Test =
         createComponentType(1, schema)
 
@@ -43,22 +40,22 @@ const schema = {
  *     initialize(position, x = 0, y = 0) { }
  * })
  */
-export function createComponentType<C extends ComponentType>(
-    schema: C['schema'],
+export function createComponentType<S extends Schema, C extends ComponentType<S>>(
+    schema: S,
     initializeOrOptions?: C['initialize'] | Omit<C, 'schema'>
-): NarrowComponentTypeSchema<C> // TODO: should infer from schema and initializeOrOptions arguments
+): NarrowComponentTypeSchema<C, S>
 
-export function createComponentType<C extends ComponentType>(
+export function createComponentType<S extends Schema, C extends ComponentType<S>>(
     name: string,
-    schema: C['schema'],
+    schema: S,
     initializeOrOptions?: C['initialize'] | Omit<C, 'schema' | 'name'>
-): NarrowComponentTypeSchema<C> // TODO: should infer from schema and initializeOrOptions arguments
+): NarrowComponentTypeSchema<C, S>
 
-export function createComponentType<C extends ComponentType>(
+export function createComponentType<S extends Schema, C extends ComponentType<S>>(
     type: number,
-    schema: C['schema'],
+    schema: S,
     initializeOrOptions?: C['initialize'] | Omit<C, 'schema' | 'type'>
-): NarrowComponentTypeSchema<C> // TODO: should infer from schema and initializeOrOptions arguments
+): NarrowComponentTypeSchema<C, S>
 
 // origin
 export function createComponentType<C extends ComponentType>(componentType: C): NarrowComponentTypeSchema<C>
